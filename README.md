@@ -1,1 +1,1 @@
-hapi js boiler plate
+hapi js boilerplate
