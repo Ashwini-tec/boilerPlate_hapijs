@@ -8,6 +8,7 @@ require('dotenv').config();
 /********* create user ************/
 exports.createUser= { 
   description: 'create user',
+  auth: false,
   validate: {
     payload : Joi.object({
       name : Joi.string().min(3).required(),
@@ -45,6 +46,7 @@ exports.getAllUser = {
       }
     },
   handler : async(req , h)=>{
+    // console.log("verify the jwt :",req.auth.credentials.id);
     try {
           const data = await services.getTheUser();
           if(!data){ return h.response({ message:"error to get the data" }).code(400)}
@@ -60,6 +62,7 @@ exports.getAllUser = {
 /***************** update the user *********/
 exports.updateUser = {
   description : "update user",
+  auth: false,
   validate: {
     payload : Joi.object({
       _id: Joi.string().required(),
@@ -91,6 +94,7 @@ exports.updateUser = {
 /*************** delete the user *****************/
 exports.removeUser ={
   description : "delete user",
+  auth: false ,
   validate: {
     payload : Joi.object({
       _id: Joi.string().required(),
@@ -134,7 +138,6 @@ exports.login = {
     let jwtToken = jwt.sign( {id} , `${process.env.JWT_SECRET_KEY}`, { expiresIn: '1 day' });
     if(!data.user){ return h.response({ message:"login failed" }).code(400)}
     return h.response({ data: data , token: jwtToken }).code(200);
-// let jwtToken = jwt.sign(obj, secret, { expiresIn: '1 day' });
   } catch (error) {
     return error.message;
   }
