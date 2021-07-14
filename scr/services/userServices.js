@@ -8,6 +8,7 @@ exports.createUser = async (data)=>{
 
     const userData = {
         name: data.name,
+        email: data.email,
         password: hash,
         gender: data.gender,
         age: data.age,
@@ -26,10 +27,9 @@ exports.createUser = async (data)=>{
 /********** get the user ************/
 exports.getTheUser = async ()=>{
     return await User.find({},{password: 0}).then((data) => {
-        data.password=undefined;
         return { message: "successfully get the data" ,user: data };
       }).catch((err) => {
-        return { err: err };
+        return { err: err.message };
       });
 };
 
@@ -48,7 +48,7 @@ exports.updateUser = async(user)=>{
         data.password=undefined;
         return { message: "successfully update the detail" ,user: data };
       }).catch((err) => {
-        return { err: err };
+        return {  err: err.message };
       });
 }
 
@@ -64,13 +64,17 @@ exports.deleteUser = async(id)=>{
 
 /*********login user ****************/
 exports.loginUser = async(user)=>{
-    const name= user.name;
-    return await User.findOne({ name : name }).then(async(data) => {
+    const email= user.email;
+    return await User.findOne({ email : email }).then(async(data) => {
+      if(data){
         const password = user.password;
         const hash = await bcrypt.compare(password,data.password);
         if(!hash){ return { message: "logined failed" ,user: null }}
         data.password = undefined;
         return { message: "successfully logined" ,user: data };
+      }else{
+        return { message: "user not found" ,user: null }
+      }
       }).catch((err) => {
         return { err: err.message };
       });

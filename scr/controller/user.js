@@ -12,6 +12,7 @@ exports.createUser= {
   validate: {
     payload : Joi.object({
       name : Joi.string().min(3).required(),
+      email: Joi.string().email().required(),
       password: Joi.string().min(5).required(),
       gender: Joi.string().required(),
       age: Joi.number().required(),
@@ -46,7 +47,7 @@ exports.getAllUser = {
       }
     },
   handler : async(req , h)=>{
-    // console.log("verify the jwt :",req.auth.credentials.id);
+    // console.log("verify the jwt :",req.auth.credentials.scope);
     try {
           const data = await services.getTheUser();
           if(!data){ return h.response({ message:"error to get the data" }).code(400)}
@@ -67,6 +68,7 @@ exports.updateUser = {
     payload : Joi.object({
       _id: Joi.string().required(),
       name : Joi.string().min(3).optional(),
+      email: Joi.string().email().optional(),
       password: Joi.string().min(5).optional(),
       gender: Joi.string().optional(),
       age: Joi.number().optional(),
@@ -123,7 +125,7 @@ exports.login = {
   description : "login user",
   validate: {
     payload : Joi.object({
-      name : Joi.string().min(3).required(),
+      email :  Joi.string().email().required(),
       password: Joi.string().min(5).required(),
     }),
     failAction: (request, h, error) => {
@@ -134,9 +136,10 @@ exports.login = {
   try {
     const user = req.payload;
     const data = await services.loginUser(user);
-    const id = data.user._id; 
-    let jwtToken = jwt.sign( {id} , `${process.env.JWT_SECRET_KEY}`, { expiresIn: '1 day' });
     if(!data.user){ return h.response({ message:"login failed" }).code(400)}
+    const id = data.user._id; 
+    const scope = data.user.userType;
+    let jwtToken = jwt.sign( { id, scope } , `${process.env.JWT_SECRET_KEY}`, { expiresIn: '1 day' });
     return h.response({ data: data , token: jwtToken }).code(200);
   } catch (error) {
     return error.message;
